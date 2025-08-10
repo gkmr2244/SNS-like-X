@@ -98,9 +98,12 @@ export function Timeline() {
 
   const handleComment = async (postId: string, content: string) => {
     try {
+      // よりユニークなIDを生成（投稿ID + タイムスタンプ + ランダム数値）
+      const uniqueId = `${postId}_comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       // 新しいコメントオブジェクトを作成
       const newComment: Comment = {
-        id: Date.now().toString(),
+        id: uniqueId,
         content,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

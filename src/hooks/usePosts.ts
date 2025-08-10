@@ -35,7 +35,7 @@ const mockPosts: Post[] = [
     },
     comments: [
       {
-        id: 'comment1',
+        id: '1_comment_1703123456789_abc123def',
         content: '素晴らしい投稿ですね！',
         createdAt: new Date(Date.now() - 1800000).toISOString(),
         updatedAt: new Date(Date.now() - 1800000).toISOString(),
@@ -52,7 +52,7 @@ const mockPosts: Post[] = [
         }
       },
       {
-        id: 'comment2',
+        id: '1_comment_1703123456789_xyz789ghi',
         content: '私も同じことを思いました！',
         createdAt: new Date(Date.now() - 900000).toISOString(),
         updatedAt: new Date(Date.now() - 900000).toISOString(),
@@ -87,7 +87,26 @@ const mockPosts: Post[] = [
       bio: '写真が好きなユーザーです',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }
+    },
+    comments: [
+      {
+        id: '2_comment_1703123456789_def456ghi',
+        content: 'とても参考になります！',
+        createdAt: new Date(Date.now() - 2700000).toISOString(),
+        updatedAt: new Date(Date.now() - 2700000).toISOString(),
+        userId: '880e8400-e29b-41d4-a716-446655440003',
+        postId: '2',
+        user: {
+          id: '880e8400-e29b-41d4-a716-446655440003',
+          username: 'hanako',
+          displayName: '花子',
+          avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+          bio: 'フロントエンド開発者です',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      }
+    ]
   },
   {
     id: '3',
@@ -106,7 +125,26 @@ const mockPosts: Post[] = [
       bio: 'プログラミングが趣味です',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }
+    },
+    comments: [
+      {
+        id: '3_comment_1703123456789_ghi789jkl',
+        content: '改行の表示がきれいですね！',
+        createdAt: new Date(Date.now() - 6300000).toISOString(),
+        updatedAt: new Date(Date.now() - 6300000).toISOString(),
+        userId: '550e8400-e29b-41d4-a716-446655440000',
+        postId: '3',
+        user: {
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          username: 'user',
+          displayName: 'ユーザー',
+          avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+          bio: 'SNSアプリのユーザーです',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      }
+    ]
   },
   {
     id: '4',
