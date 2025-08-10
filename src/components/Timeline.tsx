@@ -4,10 +4,10 @@ import { useState } from "react";
 import { PostForm } from "./PostForm";
 import { PostCard } from "./PostCard";
 import { usePosts } from "@/hooks/usePosts";
-import { LoadingState, Post } from "@/types";
+import { LoadingState, Post, Comment } from "@/types";
 
 export function Timeline() {
-  const { posts, loading, error, refetch, addPost } = usePosts();
+  const { posts, loading, error, refetch, addPost, toggleLike, addReply } = usePosts();
   const [showPostForm, setShowPostForm] = useState(false);
 
   // 固定のユーザーIDを使用（認証なし）
@@ -88,14 +88,8 @@ export function Timeline() {
       }
       */
 
-      // モックデータとしていいね数を更新
-      const updatedPosts = posts.map(post => 
-        post.id === postId 
-          ? { ...post, likesCount: post.likesCount + 1 }
-          : post
-      );
-      // 状態を更新するためにrefetchを呼び出し
-      await refetch();
+      // usePostsのtoggleLikeを使用していいねを更新
+      toggleLike(postId);
 
     } catch (error) {
       console.error('いいねエラー:', error);
@@ -104,6 +98,28 @@ export function Timeline() {
 
   const handleComment = async (postId: string, content: string) => {
     try {
+      // よりユニークなIDを生成（投稿ID + タイムスタンプ + ランダム数値）
+      const uniqueId = `${postId}_comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // 新しいコメントオブジェクトを作成
+      const newComment: Comment = {
+        id: uniqueId,
+        content,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        userId: currentUserId,
+        postId,
+        user: {
+          id: currentUserId,
+          username: 'user',
+          displayName: 'ユーザー',
+          avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+          bio: 'SNSアプリのユーザーです',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      };
+
       // モックデータとしてコメントを処理
       // 実際のAPIを呼び出す場合は以下のコメントアウトを解除
       /*
@@ -123,14 +139,8 @@ export function Timeline() {
       }
       */
 
-      // モックデータとしてコメント数を更新
-      const updatedPosts = posts.map(post => 
-        post.id === postId 
-          ? { ...post, repliesCount: post.repliesCount + 1 }
-          : post
-      );
-      // 状態を更新するためにrefetchを呼び出し
-      await refetch();
+      // usePostsのaddReplyを使用して返信数とコメントを更新
+      addReply(postId, newComment);
 
     } catch (error) {
       console.error('コメントエラー:', error);

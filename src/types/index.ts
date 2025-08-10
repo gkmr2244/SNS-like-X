@@ -18,39 +18,17 @@ export interface Post {
   repliesCount: number;
   userId: string;
   user: Profile;
+  comments?: Comment[];
 }
 
-export interface User {
+export interface Comment {
   id: string;
-  email: string;
-  username: string;
-  displayName: string | null;
-  avatarUrl: string | null;
-  bio: string | null;
+  content: string;
   createdAt: string;
   updatedAt: string;
+  userId: string;
+  postId: string;
+  user: Profile;
 }
 
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  hasMore: boolean;
-  nextCursor?: string;
-}
-
-export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
-
-export interface Theme {
-  name: string;
-  primary: string;
-  secondary: string;
-  background: string;
-  surface: string;
-  text: string;
-  textSecondary: string;
-} 
+export type LoadingState = 'idle' | 'loading' | 'success' | 'error'; 

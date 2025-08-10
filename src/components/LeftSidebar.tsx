@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 interface NavigationItem {
+  id: string;
   href: string;
   label: string;
   icon: React.ReactNode;
@@ -15,6 +16,7 @@ interface NavigationItem {
 
 const navigationItems: NavigationItem[] = [
   {
+    id: "home",
     href: "/",
     label: "ホーム",
     icon: (
@@ -24,6 +26,7 @@ const navigationItems: NavigationItem[] = [
     )
   },
   {
+    id: "messages",
     href: "#",
     label: "メッセージ",
     icon: (
@@ -33,6 +36,7 @@ const navigationItems: NavigationItem[] = [
     )
   },
   {
+    id: "profile",
     href: "/profile",
     label: "プロフィール",
     icon: (
@@ -42,6 +46,7 @@ const navigationItems: NavigationItem[] = [
     )
   },
   {
+    id: "settings",
     href: "#",
     label: "設定",
     icon: (
@@ -72,7 +77,7 @@ export function LeftSidebar() {
 
     if (item.external) {
       return (
-        <a key={item.href} href={item.href} className={baseClasses}>
+        <a key={item.id} href={item.href} className={baseClasses}>
           {item.icon}
           <span className="hidden md:inline font-medium">{item.label}</span>
         </a>
@@ -80,7 +85,7 @@ export function LeftSidebar() {
     }
 
     return (
-      <Link key={item.href} href={item.href} className={baseClasses} onClick={isMobile ? closeMobileMenu : undefined}>
+      <Link key={item.id} href={item.href} className={baseClasses} onClick={isMobile ? closeMobileMenu : undefined}>
         {item.icon}
         <span className="hidden md:inline font-medium">{item.label}</span>
       </Link>
