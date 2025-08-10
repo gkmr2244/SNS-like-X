@@ -7,7 +7,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { LoadingState, Post } from "@/types";
 
 export function Timeline() {
-  const { posts, loading, error, refetch, addPost } = usePosts();
+  const { posts, loading, error, refetch, addPost, toggleLike } = usePosts();
   const [showPostForm, setShowPostForm] = useState(false);
 
   // 固定のユーザーIDを使用（認証なし）
@@ -88,14 +88,8 @@ export function Timeline() {
       }
       */
 
-      // モックデータとしていいね数を更新
-      const updatedPosts = posts.map(post => 
-        post.id === postId 
-          ? { ...post, likesCount: post.likesCount + 1 }
-          : post
-      );
-      // 状態を更新するためにrefetchを呼び出し
-      await refetch();
+      // usePostsのtoggleLikeを使用していいねを更新
+      toggleLike(postId);
 
     } catch (error) {
       console.error('いいねエラー:', error);

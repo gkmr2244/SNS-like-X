@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Post } from '@/types';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
@@ -28,9 +28,35 @@ export function PostCard({
 }: PostCardProps) {
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [commentContent, setCommentContent] = useState('');
+  const [isLiked, setIsLiked] = useState(false);
+  const [localLikesCount, setLocalLikesCount] = useState(post.likesCount);
 
+  // 初期化時にいいねの状態を設定
+  // 実際のアプリでは、APIから現在のユーザーがいいねしているかどうかを取得
+  // ここではモックデータとして、ランダムにいいね状態を設定
+  useEffect(() => {
+    // モックデータとして、30%の確率でいいね済みにする
+    const randomLiked = Math.random() < 0.3;
+    setIsLiked(randomLiked);
+    if (randomLiked) {
+      setLocalLikesCount(prev => prev + 1);
+    }
+  }, [post.id]);
+
+  // いいねボタンのクリック処理
   const handleLike = () => {
-    onLike?.(post.id);
+    if (onLike) {
+      // ローカル状態を即座に更新（楽観的更新）
+      if (isLiked) {
+        setLocalLikesCount(prev => Math.max(0, prev - 1));
+      } else {
+        setLocalLikesCount(prev => prev + 1);
+      }
+      setIsLiked(!isLiked);
+      
+      // 親コンポーネントに通知
+      onLike(post.id);
+    }
   };
 
   const handleComment = () => {
@@ -59,6 +85,14 @@ export function PostCard({
       setShowCommentForm(false);
     }
   };
+
+  // いいねボタンのスタイルを動的に変更
+  const likeButtonStyle = cn(
+    "flex items-center space-x-2 transition-colors",
+    isLiked 
+      ? "text-red-500 hover:text-red-600 hover:bg-red-50" 
+      : "text-gray-500 hover:text-red-500 hover:bg-red-50"
+  );
 
   return (
     <article className={cn(
@@ -109,7 +143,7 @@ export function PostCard({
                 <Input
                   value={commentContent}
                   onChange={(e) => setCommentContent(e.target.value)}
-                  placeholder="コメントを入力..."
+                  placeholder="返信を入力..."
                   className="w-full"
                   maxLength={280}
                 />
@@ -119,7 +153,7 @@ export function PostCard({
                     size="sm"
                     disabled={!commentContent.trim()}
                   >
-                    送信
+                    返信
                   </Button>
                   <Button
                     type="button"
@@ -167,15 +201,17 @@ export function PostCard({
               variant="ghost"
               size="sm"
               onClick={handleLike}
-              className={cn(
-                "flex items-center space-x-2 transition-colors",
-                post.likesCount > 0 ? "text-red-500 hover:text-red-600 hover:bg-red-50" : "text-gray-500 hover:text-red-500 hover:bg-red-50"
-              )}
+              className={likeButtonStyle}
             >
-              <svg className="w-4 h-4" fill={post.likesCount > 0 ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+              <svg 
+                className="w-4 h-4" 
+                fill={isLiked ? "currentColor" : "none"} 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              <span className="text-sm">{formatNumber(post.likesCount)}</span>
+              <span className="text-sm">{formatNumber(localLikesCount)}</span>
             </Button>
           </div>
         </div>

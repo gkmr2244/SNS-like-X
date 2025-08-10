@@ -9,6 +9,7 @@ interface UsePostsReturn {
   hasMore: boolean;
   loadMore: () => Promise<void>;
   addPost: (post: Post) => void;
+  toggleLike: (postId: string) => void;
 }
 
 // モックデータ
@@ -182,6 +183,15 @@ export function usePosts(limit: number = 20): UsePostsReturn {
     setPosts(prev => [newPost, ...prev]);
   }, []);
 
+  // いいねを切り替える関数
+  const toggleLike = useCallback((postId: string) => {
+    setPosts(prev => prev.map(post => 
+      post.id === postId 
+        ? { ...post, likesCount: post.likesCount + 1 }
+        : post
+    ));
+  }, []);
+
   useEffect(() => {
     fetchPosts(false);
   }, [fetchPosts]);
@@ -193,6 +203,7 @@ export function usePosts(limit: number = 20): UsePostsReturn {
     refetch,
     hasMore,
     loadMore,
-    addPost
+    addPost,
+    toggleLike
   };
 } 
