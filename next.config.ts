@@ -1,12 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // 静的エクスポートを一時的に無効化してVercelでの動作を確認
-  // output: 'export',
-  trailingSlash: true,
-  images: {
-    unoptimized: true
-  }
+  // Vercelの標準的なNext.jsホスティング用の設定
+  // 静的エクスポートは完全に削除
 };
 
 export default nextConfig;
