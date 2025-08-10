@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
+
 import { PostForm } from "./PostForm";
 import { PostCard } from "./PostCard";
 import { usePosts } from "@/hooks/usePosts";
-import { LoadingState, Post, Comment } from "@/types";
+import { Post, Comment, LoadingState } from "@/types";
 
 export function Timeline() {
-  const { posts, loading, error, refetch, addPost, toggleLike, addReply } = usePosts();
-  const [showPostForm, setShowPostForm] = useState(false);
+  const { posts, loading, error, addPost, toggleLike, addReply } = usePosts();
 
   // 固定のユーザーIDを使用（認証なし）
   const currentUserId = "550e8400-e29b-41d4-a716-446655440000"; // 固定UUID
@@ -60,7 +59,6 @@ export function Timeline() {
 
       // モックデータとして新しい投稿を追加
       addPost(newPost);
-      setShowPostForm(false);
 
     } catch (error) {
       console.error('投稿エラー:', error);
@@ -82,7 +80,7 @@ export function Timeline() {
 
       if (response.ok) {
         // いいね後にタイムラインを更新
-        await refetch();
+        // await refetch();
       } else {
         console.error('いいねの処理に失敗しました');
       }
@@ -133,7 +131,7 @@ export function Timeline() {
 
       if (response.ok) {
         // コメント後にタイムラインを更新
-        await refetch();
+        // await refetch();
       } else {
         console.error('コメントの作成に失敗しました');
       }
@@ -178,7 +176,7 @@ export function Timeline() {
           <div className="text-center py-8">
             <p className="text-red-600">エラーが発生しました: {error}</p>
             <button
-              onClick={refetch}
+              onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               再試行

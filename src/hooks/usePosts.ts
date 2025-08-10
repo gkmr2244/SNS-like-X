@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Post, LoadingState, ApiResponse, Comment } from '@/types';
+import { Post, Comment, LoadingState } from '@/types';
 
 interface UsePostsReturn {
   posts: Post[];
@@ -253,12 +253,12 @@ export function usePosts(limit: number = 20): UsePostsReturn {
       setHasMore(false); // モックデータなので追加読み込みなし
       setCursor(null);
 
-    } catch (err) {
+    } catch (error) {
       setError('ネットワークエラーが発生しました');
     } finally {
       setLoading('success');
     }
-  }, [cursor, limit, loadFromStorage, saveToStorage]);
+  }, [loadFromStorage, saveToStorage]);
 
   const refetch = useCallback(async () => {
     setCursor(null);

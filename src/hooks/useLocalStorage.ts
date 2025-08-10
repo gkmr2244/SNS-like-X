@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { storage } from '@/lib/utils';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   // ローカルストレージから値を取得する関数
   const getStoredValue = (): T => {
     try {
-      const item = storage.get(key);
-      return item !== null ? item : initialValue;
+      if (typeof window === 'undefined') return initialValue;
+      const item = localStorage.getItem(key);
+      return item !== null ? JSON.parse(item) : initialValue;
     } catch {
       return initialValue;
     }
@@ -19,7 +19,9 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
-      storage.set(key, valueToStore);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(key, JSON.stringify(valueToStore));
+      }
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error);
     }
@@ -29,7 +31,9 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   const removeValue = () => {
     try {
       setStoredValue(initialValue);
-      storage.remove(key);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(key);
+      }
     } catch (error) {
       console.error(`Error removing localStorage key "${key}":`, error);
     }
