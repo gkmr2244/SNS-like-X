@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Post, LoadingState, ApiResponse } from '@/types';
+import { Post, LoadingState, ApiResponse, Comment } from '@/types';
 
 interface UsePostsReturn {
   posts: Post[];
@@ -10,6 +10,7 @@ interface UsePostsReturn {
   loadMore: () => Promise<void>;
   addPost: (post: Post) => void;
   toggleLike: (postId: string) => void;
+  addReply: (postId: string, comment: Comment) => void;
 }
 
 // モックデータ
@@ -31,7 +32,43 @@ const mockPosts: Post[] = [
       bio: 'SNSアプリのユーザーです',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }
+    },
+    comments: [
+      {
+        id: 'comment1',
+        content: '素晴らしい投稿ですね！',
+        createdAt: new Date(Date.now() - 1800000).toISOString(),
+        updatedAt: new Date(Date.now() - 1800000).toISOString(),
+        userId: '660e8400-e29b-41d4-a716-446655440001',
+        postId: '1',
+        user: {
+          id: '660e8400-e29b-41d4-a716-446655440001',
+          username: 'sakura',
+          displayName: 'さくら',
+          avatarUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+          bio: '写真が好きなユーザーです',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      },
+      {
+        id: 'comment2',
+        content: '私も同じことを思いました！',
+        createdAt: new Date(Date.now() - 900000).toISOString(),
+        updatedAt: new Date(Date.now() - 900000).toISOString(),
+        userId: '770e8400-e29b-41d4-a716-446655440002',
+        postId: '1',
+        user: {
+          id: '770e8400-e29b-41d4-a716-446655440002',
+          username: 'taro',
+          displayName: '太郎',
+          avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+          bio: 'プログラミングが好きです',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      }
+    ]
   },
   {
     id: '2',
@@ -192,6 +229,19 @@ export function usePosts(limit: number = 20): UsePostsReturn {
     ));
   }, []);
 
+  // 返信を追加する関数
+  const addReply = useCallback((postId: string, comment: Comment) => {
+    setPosts(prev => prev.map(post => 
+      post.id === postId 
+        ? { 
+            ...post, 
+            repliesCount: post.repliesCount + 1,
+            comments: [...(post.comments || []), comment]
+          }
+        : post
+    ));
+  }, []);
+
   useEffect(() => {
     fetchPosts(false);
   }, [fetchPosts]);
@@ -204,6 +254,7 @@ export function usePosts(limit: number = 20): UsePostsReturn {
     hasMore,
     loadMore,
     addPost,
-    toggleLike
+    toggleLike,
+    addReply
   };
 } 

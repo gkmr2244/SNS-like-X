@@ -171,6 +171,40 @@ export function PostCard({
             </div>
           )}
 
+          {/* 既存のコメントを表示 */}
+          {post.comments && post.comments.length > 0 && (
+            <div className="mb-3 space-y-2">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">返信</h4>
+              {post.comments.map((comment) => (
+                <div key={comment.id} className="pl-4 border-l-2 border-gray-200">
+                  <div className="flex items-start space-x-2">
+                    <Avatar
+                      src={comment.user.avatarUrl || undefined}
+                      alt={comment.user.displayName || comment.user.username}
+                      size="sm"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="font-medium text-sm text-gray-900">
+                          {comment.user.displayName || comment.user.username}
+                        </span>
+                        <span className="text-gray-500 text-xs">
+                          @{comment.user.username}
+                        </span>
+                        <time className="text-gray-400 text-xs">
+                          {formatTimeAgo(comment.createdAt)}
+                        </time>
+                      </div>
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                        {comment.content}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* アクションボタン */}
           <div className="flex items-center justify-between max-w-md">
             <Button
