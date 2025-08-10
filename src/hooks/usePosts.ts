@@ -22,7 +22,7 @@ const mockPosts: Post[] = [
     updatedAt: new Date().toISOString(),
     likesCount: 5,
     repostsCount: 2,
-    repliesCount: 3,
+    repliesCount: 2, // 2つのコメントがあるので2に修正
     userId: '550e8400-e29b-41d4-a716-446655440000',
     user: {
       id: '550e8400-e29b-41d4-a716-446655440000',
@@ -44,9 +44,9 @@ const mockPosts: Post[] = [
         user: {
           id: '660e8400-e29b-41d4-a716-446655440001',
           username: 'sakura',
-          displayName: 'さくら',
+          displayName: '桜',
           avatarUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-          bio: '写真が好きなユーザーです',
+          bio: 'デザイナーです',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }
@@ -63,7 +63,7 @@ const mockPosts: Post[] = [
           username: 'taro',
           displayName: '太郎',
           avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-          bio: 'プログラミングが好きです',
+          bio: 'プログラミングが趣味です',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }
@@ -77,14 +77,14 @@ const mockPosts: Post[] = [
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
     likesCount: 12,
     repostsCount: 1,
-    repliesCount: 7,
+    repliesCount: 1, // 1つのコメントがあるので1に修正
     userId: '660e8400-e29b-41d4-a716-446655440001',
     user: {
       id: '660e8400-e29b-41d4-a716-446655440001',
       username: 'sakura',
-      displayName: 'さくら',
+      displayName: '桜',
       avatarUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-      bio: '写真が好きなユーザーです',
+      bio: 'デザイナーです',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
@@ -115,7 +115,7 @@ const mockPosts: Post[] = [
     updatedAt: new Date(Date.now() - 7200000).toISOString(),
     likesCount: 8,
     repostsCount: 0,
-    repliesCount: 2,
+    repliesCount: 1, // 1つのコメントがあるので1に修正
     userId: '770e8400-e29b-41d4-a716-446655440002',
     user: {
       id: '770e8400-e29b-41d4-a716-446655440002',
@@ -153,7 +153,7 @@ const mockPosts: Post[] = [
     updatedAt: new Date(Date.now() - 10800000).toISOString(),
     likesCount: 15,
     repostsCount: 3,
-    repliesCount: 5,
+    repliesCount: 0, // コメントがないので0に修正
     userId: '880e8400-e29b-41d4-a716-446655440003',
     user: {
       id: '880e8400-e29b-41d4-a716-446655440003',
@@ -163,7 +163,8 @@ const mockPosts: Post[] = [
       bio: 'フロントエンド開発者です',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }
+    },
+    comments: [] // 空の配列を明示的に設定
   },
   {
     id: '5',
@@ -172,7 +173,7 @@ const mockPosts: Post[] = [
     updatedAt: new Date(Date.now() - 14400000).toISOString(),
     likesCount: 22,
     repostsCount: 1,
-    repliesCount: 8,
+    repliesCount: 0, // コメントがないので0に修正
     userId: '990e8400-e29b-41d4-a716-446655440004',
     user: {
       id: '990e8400-e29b-41d4-a716-446655440004',
@@ -182,7 +183,8 @@ const mockPosts: Post[] = [
       bio: 'カフェ巡りが趣味です',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }
+    },
+    comments: [] // 空の配列を明示的に設定
   }
 ];
 
@@ -193,37 +195,50 @@ export function usePosts(limit: number = 20): UsePostsReturn {
   const [hasMore, setHasMore] = useState(true);
   const [cursor, setCursor] = useState<string | null>(null);
 
+  // ローカルストレージからデータを読み込む
+  const loadFromStorage = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('sns-posts');
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          console.warn('ローカルストレージのデータの解析に失敗しました:', e);
+        }
+      }
+    }
+    return null;
+  }, []);
+
+  // ローカルストレージにデータを保存する
+  const saveToStorage = useCallback((data: Post[]) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sns-posts', JSON.stringify(data));
+    }
+  }, []);
+
   const fetchPosts = useCallback(async (isLoadMore: boolean = false) => {
     try {
       setLoading('loading');
       setError(null);
 
-      // モックデータを使用（データベース接続の問題を回避）
-      // 実際のAPIを呼び出す場合は以下のコメントアウトを解除
-      /*
-      const params = new URLSearchParams();
-      if (isLoadMore && cursor) {
-        params.append('cursor', cursor);
-      }
-      params.append('limit', limit.toString());
-
-      const response = await fetch(`/api/posts?${params.toString()}`);
-      const data: ApiResponse<{ posts: Post[]; hasMore: boolean; nextCursor?: string }> = await response.json();
-
-      if (response.ok && data.data) {
+      // まずローカルストレージから読み込みを試行
+      const storedPosts = loadFromStorage();
+      
+      if (storedPosts && storedPosts.length > 0) {
+        // ローカルストレージにデータがある場合はそれを使用
         if (isLoadMore) {
-          setPosts(prev => [...prev, ...data.data!.posts]);
+          setPosts(prev => [...prev, ...storedPosts]);
         } else {
-          setPosts(data.data.posts);
+          setPosts(storedPosts);
         }
-        setHasMore(data.data.hasMore);
-        setCursor(data.data.nextCursor || null);
-      } else {
-        setError(data.error || '投稿の取得に失敗しました');
+        setHasMore(false);
+        setCursor(null);
+        setLoading('success');
+        return;
       }
-      */
 
-      // モックデータを返す
+      // ローカルストレージにデータがない場合はモックデータを使用
       await new Promise(resolve => setTimeout(resolve, 1000)); // 1秒の遅延をシミュレート
       
       if (isLoadMore) {
@@ -231,6 +246,10 @@ export function usePosts(limit: number = 20): UsePostsReturn {
       } else {
         setPosts(mockPosts);
       }
+      
+      // モックデータをローカルストレージに保存
+      saveToStorage(mockPosts);
+      
       setHasMore(false); // モックデータなので追加読み込みなし
       setCursor(null);
 
@@ -239,7 +258,7 @@ export function usePosts(limit: number = 20): UsePostsReturn {
     } finally {
       setLoading('success');
     }
-  }, [cursor, limit]);
+  }, [cursor, limit, loadFromStorage, saveToStorage]);
 
   const refetch = useCallback(async () => {
     setCursor(null);
@@ -255,30 +274,42 @@ export function usePosts(limit: number = 20): UsePostsReturn {
 
   // 新しい投稿を追加する関数
   const addPost = useCallback((newPost: Post) => {
-    setPosts(prev => [newPost, ...prev]);
-  }, []);
+    setPosts(prev => {
+      const newPosts = [newPost, ...prev];
+      saveToStorage(newPosts);
+      return newPosts;
+    });
+  }, [saveToStorage]);
 
   // いいねを切り替える関数
   const toggleLike = useCallback((postId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { ...post, likesCount: post.likesCount + 1 }
-        : post
-    ));
-  }, []);
+    setPosts(prev => {
+      const newPosts = prev.map(post => 
+        post.id === postId 
+          ? { ...post, likesCount: post.likesCount + 1 }
+          : post
+      );
+      saveToStorage(newPosts);
+      return newPosts;
+    });
+  }, [saveToStorage]);
 
   // 返信を追加する関数
   const addReply = useCallback((postId: string, comment: Comment) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { 
-            ...post, 
-            repliesCount: post.repliesCount + 1,
-            comments: [...(post.comments || []), comment]
-          }
-        : post
-    ));
-  }, []);
+    setPosts(prev => {
+      const newPosts = prev.map(post => 
+        post.id === postId 
+          ? { 
+              ...post, 
+              repliesCount: post.repliesCount + 1,
+              comments: [...(post.comments || []), comment]
+            }
+          : post
+      );
+      saveToStorage(newPosts);
+      return newPosts;
+    });
+  }, [saveToStorage]);
 
   useEffect(() => {
     fetchPosts(false);
